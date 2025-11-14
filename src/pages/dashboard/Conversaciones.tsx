@@ -7,6 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ContactPanel } from "@/components/ContactPanel";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { Smile } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: number;
@@ -33,6 +37,8 @@ const Conversaciones = () => {
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -97,6 +103,26 @@ const Conversaciones = () => {
     setSending(true);
 
     try {
+      // Call webhook to send message
+      const webhookResponse = await fetch("https://agentes1111-n8n.vnh08s.easypanel.host/webhook/enviarm_mensaje", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mensaje: newMessage.trim(),
+          numero_c: userPhone,
+          numero_w: selectedConversation,
+          tipo_mensaje: "salida",
+          sentid: "sent",
+        }),
+      });
+
+      if (!webhookResponse.ok) {
+        throw new Error("Error al enviar mensaje al webhook");
+      }
+
+      // Also save to database
       const { error } = await supabase.from("conversaciones").insert({
         numero_c: userPhone,
         numero_w: selectedConversation,
@@ -136,11 +162,25 @@ const Conversaciones = () => {
       }
 
       setNewMessage("");
+      toast({
+        title: "Mensaje enviado",
+        description: "El mensaje se ha enviado correctamente",
+      });
     } catch (error) {
       console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo enviar el mensaje",
+        variant: "destructive",
+      });
     } finally {
       setSending(false);
     }
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage(prev => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
   };
 
   const selectedMessages = conversations.find(
@@ -319,12 +359,30 @@ const Conversaciones = () => {
             {/* Message Input */}
             <div className="p-4 border-t border-border bg-card">
               <form onSubmit={handleSendMessage} className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Escribe un mensaje..."
-                  className="flex-1"
-                />
+                <div className="flex-1 flex gap-2">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Escribe un mensaje..."
+                    className="flex-1"
+                    disabled={sending}
+                  />
+                  <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        disabled={sending}
+                      >
+                        <Smile className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 border-0" align="end">
+                      <EmojiPicker onEmojiClick={handleEmojiClick} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <Button type="submit" disabled={!newMessage.trim() || sending}>
                   {sending ? "Enviando..." : "Enviar"}
                 </Button>
