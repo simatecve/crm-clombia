@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Phone } from "lucide-react";
+import { User, Mail, Phone, ChevronRight, ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ContactData {
   id: string;
@@ -38,6 +39,7 @@ export const ContactPanel = ({ numeroW }: ContactPanelProps) => {
   const [contact, setContact] = useState<ContactData | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
@@ -145,121 +147,142 @@ export const ContactPanel = ({ numeroW }: ContactPanelProps) => {
 
   if (loading) {
     return (
-      <div className="w-80 border-l border-border bg-card p-4">
-        <p className="text-muted-foreground">Cargando...</p>
+      <div className={cn(
+        "relative border-l border-border bg-card transition-all duration-300",
+        isExpanded ? "w-80" : "w-12"
+      )}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 -left-3 z-10 h-6 w-6 rounded-full border border-border bg-background shadow-md"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </Button>
+        {isExpanded && <p className="p-4 text-muted-foreground">Cargando...</p>}
       </div>
     );
   }
 
   return (
-    <div className="w-80 border-l border-border bg-card overflow-y-auto">
-      <Card className="border-0 rounded-none">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Información del Contacto
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Estado del Lead */}
-          <div className="space-y-2">
-            <Label>Estado del Lead</Label>
-            {editing ? (
-              <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ESTADOS.map((estado) => (
-                    <SelectItem key={estado.value} value={estado.value}>
-                      {estado.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <div>{getEstadoBadge(contact?.estado || "nuevo")}</div>
-            )}
-          </div>
-
-          {/* Número de WhatsApp */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              Número
-            </Label>
-            <Input value={numeroW} disabled className="bg-muted" />
-          </div>
-
-          {/* Nombre */}
-          <div className="space-y-2">
-            <Label>Nombre</Label>
-            <Input
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-              disabled={!editing}
-              placeholder="Nombre del contacto"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Email
-            </Label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              disabled={!editing}
-              placeholder="correo@ejemplo.com"
-            />
-          </div>
-
-          {/* Notas */}
-          <div className="space-y-2">
-            <Label>Notas</Label>
-            <Textarea
-              value={formData.notas}
-              onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-              disabled={!editing}
-              placeholder="Notas sobre el contacto..."
-              rows={4}
-            />
-          </div>
-
-          {/* Botones */}
-          <div className="flex gap-2">
-            {editing ? (
-              <>
-                <Button onClick={handleSave} className="flex-1">
-                  Guardar
-                </Button>
-                <Button onClick={() => setEditing(false)} variant="outline" className="flex-1">
-                  Cancelar
-                </Button>
-              </>
-            ) : (
-              <Button onClick={() => setEditing(true)} className="w-full">
-                Editar
-              </Button>
-            )}
-          </div>
-
-          {/* Metadata */}
-          {contact && (
-            <div className="pt-4 border-t border-border space-y-1">
-              <p className="text-xs text-muted-foreground">
-                Creado: {new Date(contact.created_at).toLocaleDateString()}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Actualizado: {new Date(contact.updated_at).toLocaleDateString()}
-              </p>
+    <div className={cn(
+      "relative border-l border-border bg-card overflow-y-auto transition-all duration-300",
+      isExpanded ? "w-80" : "w-12"
+    )}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 -left-3 z-10 h-6 w-6 rounded-full border border-border bg-background shadow-md"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        {isExpanded ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </Button>
+      
+      {isExpanded && (
+        <Card className="border-0 rounded-none">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Información del Contacto
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Estado del Lead */}
+            <div className="space-y-2">
+              <Label>Estado del Lead</Label>
+              {editing ? (
+                <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ESTADOS.map((estado) => (
+                      <SelectItem key={estado.value} value={estado.value}>
+                        {estado.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div>{getEstadoBadge(contact?.estado || "nuevo")}</div>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* Número de WhatsApp */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Número
+              </Label>
+              <Input value={numeroW} disabled className="bg-muted" />
+            </div>
+
+            {/* Nombre */}
+            <div className="space-y-2">
+              <Label>Nombre</Label>
+              <Input
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                disabled={!editing}
+                placeholder="Nombre del contacto"
+              />
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email
+              </Label>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled={!editing}
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+
+            {/* Notas */}
+            <div className="space-y-2">
+              <Label>Notas</Label>
+              <Textarea
+                value={formData.notas}
+                onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                disabled={!editing}
+                placeholder="Notas sobre el contacto..."
+                rows={4}
+              />
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-2">
+              {editing ? (
+                <>
+                  <Button onClick={handleSave} className="flex-1">
+                    Guardar
+                  </Button>
+                  <Button onClick={() => setEditing(false)} variant="outline" className="flex-1">
+                    Cancelar
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => setEditing(true)} className="w-full">
+                  Editar
+                </Button>
+              )}
+            </div>
+
+            {/* Metadata */}
+            {contact && (
+              <div className="text-xs text-muted-foreground space-y-1 pt-4 border-t border-border">
+                <p>Creado: {new Date(contact.created_at).toLocaleDateString()}</p>
+                <p>Actualizado: {new Date(contact.updated_at).toLocaleDateString()}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
