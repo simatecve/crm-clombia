@@ -1,4 +1,4 @@
-import { User, Settings, Inbox, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Settings, Inbox, MessageSquare } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Perfil", url: "/dashboard/perfil", icon: User },
+  { title: "Dashboard", url: "/dashboard/perfil", icon: LayoutDashboard },
   { title: "Conversaciones", url: "/dashboard/conversaciones", icon: MessageSquare },
   { title: "Leads", url: "/dashboard/leads", icon: Inbox },
   { title: "Bandejas", url: "/dashboard/bandejas", icon: Inbox },
