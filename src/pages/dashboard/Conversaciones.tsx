@@ -245,8 +245,19 @@ const Conversaciones = () => {
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
                 {selectedMessages.map((msg) => {
-                  // Usar tipo_mensaje para determinar entrada/salida
-                  const isOutgoing = msg.tipo_mensaje === "salida" || msg.tipo_mensaje === "sent" || msg.tipo_mensaje === "outgoing";
+                  // Mensajes de salida: enviados por mí (usuario logueado)
+                  // Mensajes de entrada: recibidos del cliente
+                  const isOutgoing = 
+                    msg.tipo_mensaje === "salida" || 
+                    msg.tipo_mensaje === "saliente" || 
+                    msg.tipo_mensaje === "sent" || 
+                    msg.tipo_mensaje === "outgoing";
+                  
+                  const isIncoming = 
+                    msg.tipo_mensaje === "entrada" || 
+                    msg.tipo_mensaje === "entrante" || 
+                    msg.tipo_mensaje === "received" || 
+                    msg.tipo_mensaje === "incoming";
                   
                   return (
                     <div
@@ -264,27 +275,39 @@ const Conversaciones = () => {
                             : "bg-card text-card-foreground border border-border"
                         )}
                       >
-                        {msg.mensaje && (
-                          <p className="text-sm break-words">{msg.mensaje}</p>
-                        )}
-                        {msg.url_adjunto && (
-                          <a
-                            href={msg.url_adjunto}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs underline"
-                          >
-                            Ver adjunto
-                          </a>
-                        )}
-                        <p
-                          className={cn(
-                            "text-xs mt-1",
-                            isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
+                        <div className="flex flex-col gap-1">
+                          {msg.mensaje && (
+                            <p className="text-sm break-words">{msg.mensaje}</p>
                           )}
-                        >
-                          {new Date(msg.created_at).toLocaleTimeString()}
-                        </p>
+                          {msg.url_adjunto && (
+                            <a
+                              href={msg.url_adjunto}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs underline"
+                            >
+                              Ver adjunto
+                            </a>
+                          )}
+                          <div className="flex items-center gap-2 justify-between">
+                            <span
+                              className={cn(
+                                "text-xs",
+                                isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
+                              )}
+                            >
+                              {new Date(msg.created_at).toLocaleTimeString()}
+                            </span>
+                            <span
+                              className={cn(
+                                "text-xs font-medium",
+                                isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
+                              )}
+                            >
+                              {isOutgoing ? "Enviado" : "Recibido"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
