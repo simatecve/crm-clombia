@@ -146,6 +146,106 @@ export type Database = {
         }
         Relationships: []
       }
+      conversaciones_sociales: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          integracion_id: string
+          no_leidos: number | null
+          participante_avatar: string | null
+          participante_id: string | null
+          participante_nombre: string | null
+          plataforma: string
+          ultimo_mensaje: string | null
+          ultimo_mensaje_fecha: string | null
+          updated_at: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          integracion_id: string
+          no_leidos?: number | null
+          participante_avatar?: string | null
+          participante_id?: string | null
+          participante_nombre?: string | null
+          plataforma: string
+          ultimo_mensaje?: string | null
+          ultimo_mensaje_fecha?: string | null
+          updated_at?: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          integracion_id?: string
+          no_leidos?: number | null
+          participante_avatar?: string | null
+          participante_id?: string | null
+          participante_nombre?: string | null
+          plataforma?: string
+          ultimo_mensaje?: string | null
+          ultimo_mensaje_fecha?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversaciones_sociales_integracion_id_fkey"
+            columns: ["integracion_id"]
+            isOneToOne: false
+            referencedRelation: "integraciones_sociales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integraciones_sociales: {
+        Row: {
+          activo: boolean | null
+          created_at: string
+          id: string
+          page_access_token: string
+          page_id: string
+          page_name: string | null
+          plataforma: string
+          ultima_sincronizacion: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean | null
+          created_at?: string
+          id?: string
+          page_access_token: string
+          page_id: string
+          page_name?: string | null
+          plataforma: string
+          ultima_sincronizacion?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activo?: boolean | null
+          created_at?: string
+          id?: string
+          page_access_token?: string
+          page_id?: string
+          page_name?: string | null
+          plataforma?: string
+          ultima_sincronizacion?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integraciones_sociales_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       keywords: {
         Row: {
           created_at: string
@@ -169,6 +269,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      mensajes_sociales: {
+        Row: {
+          adjuntos: Json | null
+          conversacion_id: string
+          created_at: string
+          de_usuario_id: string | null
+          de_usuario_nombre: string | null
+          es_enviado: boolean | null
+          id: string
+          leido: boolean | null
+          message_id: string
+          texto: string | null
+          tipo: string | null
+        }
+        Insert: {
+          adjuntos?: Json | null
+          conversacion_id: string
+          created_at?: string
+          de_usuario_id?: string | null
+          de_usuario_nombre?: string | null
+          es_enviado?: boolean | null
+          id?: string
+          leido?: boolean | null
+          message_id: string
+          texto?: string | null
+          tipo?: string | null
+        }
+        Update: {
+          adjuntos?: Json | null
+          conversacion_id?: string
+          created_at?: string
+          de_usuario_id?: string | null
+          de_usuario_nombre?: string | null
+          es_enviado?: boolean | null
+          id?: string
+          leido?: boolean | null
+          message_id?: string
+          texto?: string | null
+          tipo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensajes_sociales_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "conversaciones_sociales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       n8n_chat_histories: {
         Row: {
