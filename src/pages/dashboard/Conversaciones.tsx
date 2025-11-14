@@ -104,6 +104,22 @@ const Conversaciones = () => {
     );
   }
 
+  if (conversations.length === 0) {
+    return (
+      <div className="p-4">
+        <Card className="p-6">
+          <h3 className="font-semibold mb-2">No hay conversaciones</h3>
+          <p className="text-muted-foreground text-sm mb-2">
+            Buscando conversaciones para el número: <span className="font-mono">{userPhone}</span>
+          </p>
+          <p className="text-muted-foreground text-sm">
+            No se encontraron mensajes en la tabla conversaciones donde numero_c = {userPhone}
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[calc(100vh-4rem)] flex">
       {/* Conversations List */}
