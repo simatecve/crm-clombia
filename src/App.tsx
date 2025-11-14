@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/dashboard/Perfil";
 import Conversaciones from "./pages/dashboard/Conversaciones";
+import Leads from "./pages/dashboard/Leads";
 import Bandejas from "./pages/dashboard/Bandejas";
 import Configuracion from "./pages/dashboard/Configuracion";
 import NotFound from "./pages/NotFound";
@@ -27,6 +28,7 @@ const App = () => (
             <Route index element={<Navigate to="/dashboard/perfil" replace />} />
             <Route path="perfil" element={<Perfil />} />
             <Route path="conversaciones" element={<Conversaciones />} />
+            <Route path="leads" element={<Leads />} />
             <Route path="bandejas" element={<Bandejas />} />
             <Route path="configuracion" element={<Configuracion />} />
           </Route>
