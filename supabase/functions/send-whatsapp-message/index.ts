@@ -16,28 +16,31 @@ serve(async (req) => {
 
     console.log('Sending message to webhook:', { mensaje, numero_c, numero_w });
 
-    // Call the n8n webhook
-    const webhookResponse = await fetch(
-      "https://agentes1111-n8n.vnh08s.easypanel.host/webhook/enviarm_mensaje",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          mensaje,
-          numero_c,
-          numero_w,
-          tipo_mensaje,
-          sentid,
-        }),
-      }
-    );
+    // Build query parameters for GET request
+    const params = new URLSearchParams({
+      mensaje,
+      numero_c,
+      numero_w,
+      tipo_mensaje: tipo_mensaje || "salida",
+      sentid: sentid || "sent",
+    });
+
+    // Try GET request first (as suggested by webhook)
+    const webhookUrl = `https://agentes1111-n8n.vnh08s.easypanel.host/webhook/enviarm_mensaje?${params.toString()}`;
+    
+    console.log('Calling webhook with GET method:', webhookUrl);
+
+    const webhookResponse = await fetch(webhookUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!webhookResponse.ok) {
       const errorText = await webhookResponse.text();
       console.error('Webhook error:', errorText);
-      throw new Error(`Webhook returned status ${webhookResponse.status}`);
+      throw new Error(`Webhook returned status ${webhookResponse.status}: ${errorText}`);
     }
 
     const responseData = await webhookResponse.json().catch(() => ({}));
