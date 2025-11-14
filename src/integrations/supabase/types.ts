@@ -80,6 +80,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contactos: {
+        Row: {
+          created_at: string
+          email: string | null
+          estado: string
+          id: string
+          nombre: string | null
+          notas: string | null
+          numero_w: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          estado?: string
+          id?: string
+          nombre?: string | null
+          notas?: string | null
+          numero_w: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          estado?: string
+          id?: string
+          nombre?: string | null
+          notas?: string | null
+          numero_w?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversaciones: {
         Row: {
           created_at: string
