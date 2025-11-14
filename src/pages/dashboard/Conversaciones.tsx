@@ -216,11 +216,12 @@ const Conversaciones = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex">
+    <div className="h-[calc(100vh-4rem)] flex bg-background">
       {/* Conversations List */}
-      <div className="w-80 border-r border-border bg-card">
+      <div className="w-80 border-r border-border bg-card shadow-sm">
         <div className="p-4 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">Conversaciones</h2>
+          <h2 className="text-xl font-semibold text-foreground">Chats</h2>
+          <p className="text-xs text-muted-foreground mt-1">Inbox · {conversations.length} conversaciones</p>
         </div>
         <ScrollArea className="h-[calc(100%-5rem)]">
           {conversations.length === 0 ? (
@@ -233,26 +234,45 @@ const Conversaciones = () => {
                 key={conv.numero_w}
                 onClick={() => setSelectedConversation(conv.numero_w)}
                 className={cn(
-                  "w-full p-4 flex items-start gap-3 hover:bg-accent transition-colors border-b border-border",
-                  selectedConversation === conv.numero_w && "bg-accent"
+                  "w-full p-4 flex items-center gap-3 hover:bg-accent/50 transition-all duration-200 border-b border-border/50",
+                  selectedConversation === conv.numero_w && "bg-primary text-primary-foreground hover:bg-primary"
                 )}
               >
-                <Avatar>
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {conv.numero_w?.slice(-2) || "??"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 text-left overflow-hidden">
-                  <p className="font-medium text-foreground truncate">
-                    {conv.numero_w}
-                  </p>
-                  <p className="text-sm text-muted-foreground truncate">
+                <div className="relative">
+                  <Avatar className="h-11 w-11">
+                    <AvatarFallback className={cn(
+                      "text-sm font-medium",
+                      selectedConversation === conv.numero_w 
+                        ? "bg-primary-foreground/20 text-primary-foreground" 
+                        : "bg-primary/10 text-primary"
+                    )}>
+                      {conv.numero_w?.slice(-2) || "??"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card"></div>
+                </div>
+                <div className="flex-1 text-left overflow-hidden min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <p className={cn(
+                      "font-semibold text-sm truncate",
+                      selectedConversation === conv.numero_w ? "text-primary-foreground" : "text-foreground"
+                    )}>
+                      {conv.numero_w}
+                    </p>
+                    <span className={cn(
+                      "text-xs shrink-0",
+                      selectedConversation === conv.numero_w ? "text-primary-foreground/70" : "text-muted-foreground"
+                    )}>
+                      {new Date(conv.lastMessageTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className={cn(
+                    "text-sm truncate",
+                    selectedConversation === conv.numero_w ? "text-primary-foreground/80" : "text-muted-foreground"
+                  )}>
                     {conv.lastMessage}
                   </p>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(conv.lastMessageTime).toLocaleDateString()}
-                </span>
               </button>
             ))
           )}
@@ -264,26 +284,25 @@ const Conversaciones = () => {
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-border bg-card flex items-center gap-3">
-              <Avatar>
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {selectedConversation.slice(-2)}
-                </AvatarFallback>
-              </Avatar>
+            <div className="p-4 border-b border-border bg-card flex items-center gap-3 shadow-sm">
+              <div className="relative">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                    {selectedConversation.slice(-2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card"></div>
+              </div>
               <div>
-                <p className="font-medium text-foreground">{selectedConversation}</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedMessages.length} mensajes
-                </p>
+                <p className="font-semibold text-foreground">{selectedConversation}</p>
+                <p className="text-xs text-green-600 font-medium">Online</p>
               </div>
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 p-6">
+              <div className="space-y-4 max-w-4xl mx-auto">
                 {selectedMessages.map((msg) => {
-                  // Mensajes de salida: enviados por mí (usuario logueado)
-                  // Mensajes de entrada: recibidos del cliente
                   const isOutgoing = 
                     msg.tipo_mensaje === "salida" || 
                     msg.tipo_mensaje === "saliente" || 
@@ -300,52 +319,56 @@ const Conversaciones = () => {
                     <div
                       key={msg.id}
                       className={cn(
-                        "flex",
+                        "flex items-end gap-2",
                         isOutgoing ? "justify-end" : "justify-start"
                       )}
                     >
+                      {!isOutgoing && (
+                        <Avatar className="h-8 w-8 mb-1">
+                          <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                            {selectedConversation.slice(-2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
                       <div
                         className={cn(
-                          "max-w-[70%] rounded-lg p-3",
+                          "max-w-[65%] rounded-2xl px-4 py-2.5 shadow-sm",
                           isOutgoing
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-card text-card-foreground border border-border"
+                            ? "bg-primary text-primary-foreground rounded-br-md"
+                            : "bg-card text-card-foreground border border-border rounded-bl-md"
                         )}
                       >
                         <div className="flex flex-col gap-1">
                           {msg.mensaje && (
-                            <p className="text-sm break-words">{msg.mensaje}</p>
+                            <p className="text-sm break-words leading-relaxed">{msg.mensaje}</p>
                           )}
                           {msg.url_adjunto && (
                             <a
                               href={msg.url_adjunto}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs underline"
+                              className="text-xs underline mt-1"
                             >
                               Ver adjunto
                             </a>
                           )}
-                          <div className="flex items-center gap-2 justify-between">
-                            <span
-                              className={cn(
-                                "text-xs",
-                                isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
-                              )}
-                            >
-                              {new Date(msg.created_at).toLocaleTimeString()}
-                            </span>
-                            <span
-                              className={cn(
-                                "text-xs font-medium",
-                                isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
-                              )}
-                            >
-                              {isOutgoing ? "Enviado" : "Recibido"}
-                            </span>
-                          </div>
+                          <span
+                            className={cn(
+                              "text-xs mt-1",
+                              isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
+                            )}
+                          >
+                            {new Date(msg.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
                       </div>
+                      {isOutgoing && (
+                        <Avatar className="h-8 w-8 mb-1">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            Yo
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
                     </div>
                   );
                 })}
@@ -353,34 +376,41 @@ const Conversaciones = () => {
             </ScrollArea>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-border bg-card">
-              <form onSubmit={handleSendMessage} className="flex gap-2">
-                <div className="flex-1 flex gap-2">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Escribe un mensaje..."
-                    className="flex-1"
-                    disabled={sending}
-                  />
-                  <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        disabled={sending}
-                      >
-                        <Smile className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0 border-0" align="end">
-                      <EmojiPicker onEmojiClick={handleEmojiClick} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Button type="submit" disabled={!newMessage.trim() || sending}>
-                  {sending ? "Enviando..." : "Enviar"}
+            <div className="p-4 border-t border-border bg-card shadow-sm">
+              <form onSubmit={handleSendMessage} className="flex gap-2 max-w-4xl mx-auto">
+                <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={sending}
+                      className="shrink-0"
+                    >
+                      <Smile className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0 border-0" align="start">
+                    <EmojiPicker onEmojiClick={handleEmojiClick} />
+                  </PopoverContent>
+                </Popover>
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Write a message..."
+                  className="flex-1 bg-muted/50 border-0 focus-visible:ring-1"
+                  disabled={sending}
+                />
+                <Button 
+                  type="submit" 
+                  disabled={!newMessage.trim() || sending}
+                  size="icon"
+                  className="shrink-0"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                    <path d="M22 2 11 13"/>
+                  </svg>
                 </Button>
               </form>
             </div>
