@@ -103,23 +103,19 @@ const Conversaciones = () => {
     setSending(true);
 
     try {
-      // Call webhook to send message
-      const webhookResponse = await fetch("https://agentes1111-n8n.vnh08s.easypanel.host/webhook/enviarm_mensaje", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      // Call edge function to send message to webhook
+      const { error: functionError } = await supabase.functions.invoke('send-whatsapp-message', {
+        body: {
           mensaje: newMessage.trim(),
           numero_c: userPhone,
           numero_w: selectedConversation,
           tipo_mensaje: "salida",
           sentid: "sent",
-        }),
+        },
       });
 
-      if (!webhookResponse.ok) {
-        throw new Error("Error al enviar mensaje al webhook");
+      if (functionError) {
+        throw new Error(functionError.message || "Error al enviar mensaje al webhook");
       }
 
       // Also save to database
