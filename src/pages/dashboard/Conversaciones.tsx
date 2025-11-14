@@ -100,7 +100,7 @@ const Conversaciones = () => {
         numero_c: userPhone,
         numero_w: selectedConversation,
         mensaje: newMessage.trim(),
-        tipo_mensaje: "text",
+        tipo_mensaje: "salida",
         sentid: "sent",
       });
 
@@ -245,22 +245,21 @@ const Conversaciones = () => {
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
                 {selectedMessages.map((msg) => {
-                  // Mensaje de salida: cuando numero_c coincide con el usuario logueado
-                  // Mensaje de entrada: cuando numero_w es el contacto
-                  const isSentByUser = msg.numero_c === userPhone;
+                  // Usar tipo_mensaje para determinar entrada/salida
+                  const isOutgoing = msg.tipo_mensaje === "salida" || msg.tipo_mensaje === "sent" || msg.tipo_mensaje === "outgoing";
                   
                   return (
                     <div
                       key={msg.id}
                       className={cn(
                         "flex",
-                        isSentByUser ? "justify-end" : "justify-start"
+                        isOutgoing ? "justify-end" : "justify-start"
                       )}
                     >
                       <div
                         className={cn(
                           "max-w-[70%] rounded-lg p-3",
-                          isSentByUser
+                          isOutgoing
                             ? "bg-primary text-primary-foreground"
                             : "bg-card text-card-foreground border border-border"
                         )}
@@ -281,7 +280,7 @@ const Conversaciones = () => {
                         <p
                           className={cn(
                             "text-xs mt-1",
-                            isSentByUser ? "text-primary-foreground/70" : "text-muted-foreground"
+                            isOutgoing ? "text-primary-foreground/70" : "text-muted-foreground"
                           )}
                         >
                           {new Date(msg.created_at).toLocaleTimeString()}
