@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -28,6 +30,8 @@ const Conversaciones = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [userPhone, setUserPhone] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newMessage, setNewMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -83,6 +87,60 @@ const Conversaciones = () => {
 
     fetchConversations();
   }, []);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newMessage.trim() || !selectedConversation || !userPhone) return;
+
+    setSending(true);
+
+    try {
+      const { error } = await supabase.from("conversaciones").insert({
+        numero_c: userPhone,
+        numero_w: selectedConversation,
+        mensaje: newMessage.trim(),
+        tipo_mensaje: "text",
+        sentid: "sent",
+      });
+
+      if (error) throw error;
+
+      // Refresh conversations after sending
+      const { data: messages } = await supabase
+        .from("conversaciones")
+        .select("*")
+        .eq("numero_c", userPhone)
+        .order("created_at", { ascending: true });
+
+      if (messages) {
+        const grouped = messages.reduce((acc: { [key: string]: Message[] }, msg) => {
+          const key = msg.numero_w || "unknown";
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(msg);
+          return acc;
+        }, {});
+
+        const convs: Conversation[] = Object.entries(grouped).map(([numero_w, msgs]) => {
+          const lastMsg = msgs[msgs.length - 1];
+          return {
+            numero_w,
+            lastMessage: lastMsg.mensaje || "Adjunto",
+            lastMessageTime: lastMsg.created_at,
+            messages: msgs,
+          };
+        });
+
+        setConversations(convs);
+      }
+
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setSending(false);
+    }
+  };
 
   const selectedMessages = conversations.find(
     (c) => c.numero_w === selectedConversation
@@ -187,22 +245,24 @@ const Conversaciones = () => {
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
                 {selectedMessages.map((msg) => {
-                  const isReceived = msg.sentid === "received" || msg.numero_w === selectedConversation;
+                  // Mensaje de salida: cuando numero_c coincide con el usuario logueado
+                  // Mensaje de entrada: cuando numero_w es el contacto
+                  const isSentByUser = msg.numero_c === userPhone;
                   
                   return (
                     <div
                       key={msg.id}
                       className={cn(
                         "flex",
-                        isReceived ? "justify-start" : "justify-end"
+                        isSentByUser ? "justify-end" : "justify-start"
                       )}
                     >
                       <div
                         className={cn(
                           "max-w-[70%] rounded-lg p-3",
-                          isReceived
-                            ? "bg-card text-card-foreground"
-                            : "bg-primary text-primary-foreground"
+                          isSentByUser
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-card text-card-foreground border border-border"
                         )}
                       >
                         {msg.mensaje && (
@@ -221,7 +281,7 @@ const Conversaciones = () => {
                         <p
                           className={cn(
                             "text-xs mt-1",
-                            isReceived ? "text-muted-foreground" : "text-primary-foreground/70"
+                            isSentByUser ? "text-primary-foreground/70" : "text-muted-foreground"
                           )}
                         >
                           {new Date(msg.created_at).toLocaleTimeString()}
@@ -232,6 +292,21 @@ const Conversaciones = () => {
                 })}
               </div>
             </ScrollArea>
+
+            {/* Message Input */}
+            <div className="p-4 border-t border-border bg-card">
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Escribe un mensaje..."
+                  className="flex-1"
+                />
+                <Button type="submit" disabled={!newMessage.trim() || sending}>
+                  {sending ? "Enviando..." : "Enviar"}
+                </Button>
+              </form>
+            </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
